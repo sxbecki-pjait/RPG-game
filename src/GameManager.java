@@ -293,7 +293,7 @@ public class GameManager {
             System.out.println("YOU WON THE BATTLE! ++ LEVEL ++");
             playerCharacter.levelUp();
         } else{
-            System.out.println("YOU DIED, BUT THE PROGRESS HAVE BEEN SAVED");
+            System.out.println("YOU DIED, BUT THE PROGRESS HAS BEEN SAVED");
             moveToNextAction();
             playerCharacter.restorePlayersHp();
             playerCharacter.setDead(false);
