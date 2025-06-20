@@ -9,6 +9,7 @@ public class GameManager {
     private boolean entityInTheCave = true;
     private boolean entityInTheTemple = true;
     private boolean entityInTheForest = true;
+    private boolean elixirAvailable = true;
 
     public GameManager() {
         this.playerLocation = "HOME";
@@ -48,6 +49,12 @@ public class GameManager {
     }
 
     public void playerAtHome(){
+        playerLocation = "HOME";
+        if(!entityInTheCave && !entityInTheTemple && !entityInTheForest) {
+            clearScreen();
+            wonTheGame();
+            return;
+        }
         playerChoiceScreen();
         System.out.println("GO TO MOUNTAINS (0)");
         System.out.println("GO TO TEMPLE (1)");
@@ -59,15 +66,12 @@ public class GameManager {
         Scanner scanner = new Scanner(System.in);
         int input = scanner.nextInt();
         if(input == 0) {
-            playerLocation = "MOUNTAINS";
             playerInTheMountains();
         }
         else if(input == 1) {
-            playerLocation = "OUTSIDE THE TEMPLE";
             playerInTheTemple();
         }
         else if (input == 2) {
-            playerLocation = "FOREST";
             playerInTheForest();
         }
         else if(input == 3 && playerCharacter.getHp() < playerCharacter.getHpMax()) {
@@ -144,7 +148,31 @@ public class GameManager {
         int input = scanner.nextInt();
         if(input == 0) {
             if(!entityInTheTemple){
-                System.out.println("SEEMS LIKE THERE IS NOTHING INTERESTING ANYMORE");
+                clearScreen();
+                if(elixirAvailable){
+                    System.out.println("THERE IS A MAGIC ELIXIR CREATED BY ANCIENT MONK DYNASTY MEMBERS...");
+                    System.out.println("DRINK IT (0)");
+                    System.out.println("LEAVE THE TEMPLE (1)");
+                    Scanner sc2 = new Scanner(System.in);
+                    int input2 = sc2.nextInt();
+                    if(input2 == 0) {
+                        System.out.println("DRINKING ELIXIR GAVE YOU MORE POWER! ++LEVEL++");
+                        playerCharacter.levelUp();
+                        elixirAvailable = false;
+                    }
+                    else if(input2 == 1){
+                        System.out.println("*LEAVING THE TEMPLE*");
+                    }
+                    else {
+                        System.out.println("\n\n\nINVALID INPUT. TRY AGAIN");
+                        moveToNextAction();
+                        playerInTheTemple();
+                    }
+                }
+                else{
+                    System.out.print("SEEMS LIKE THERE IS NOTHING INTERESTING ANYMORE");
+                }
+
                 moveToNextAction();
             }
             else{
@@ -180,34 +208,37 @@ public class GameManager {
     public void playerInTheForest(){
         playerLocation = "FOREST";
         playerChoiceScreen();
-        System.out.println("ENTER THE DARK WOODEN SHED (0)");
-        System.out.println("READ THE TEXT ON THE OLD WALL (1)");
+        System.out.println("QUIETLY ENTER THE DARK WOODEN SHED (0)");
+        System.out.println("THROW A PIECE OF WOOD AT THE WINDOW (1)");
         System.out.println("GO BACK HOME (2)");
         System.out.print("\nYOUR CHOICE: ");
         Scanner scanner = new Scanner(System.in);
         int input = scanner.nextInt();
         if(input == 0) {
-            if(!entityInTheTemple){
+            if(!entityInTheForest){
                 System.out.println("SEEMS LIKE THERE IS NOTHING INTERESTING ANYMORE");
                 moveToNextAction();
             }
             else{
-                battle(playerCharacter, new Monk(), "TEMPLE");
+                battle(playerCharacter, new Lumberjack(false), "SHED");
             }
             if(!playerCharacter.isDead()){
-                playerInTheTemple();
+                playerInTheForest();
             }
         }
         else if(input == 1) {
             clearScreen();
-            if(entityInTheTemple){
-                System.out.println("IT'S WRITTEN *UNBEATABLE MONK DYNASTY*");
+            if(entityInTheForest){
+                System.out.println("INSANELY ANGRY LUMBERJACK IS RUNNING OUT OF THE SHED WITH A HUGE AXE");
+                playerLocation = "OUTSIDE THE SHED";
+                moveToNextAction();
+                battle(playerCharacter, new Lumberjack(true), "SHED");
             }
             else{
-                System.out.println("THE TEXT IS BLURRED AND CHANGED IT'S COLOR TO GREY, YOU CAN'T READ IT ANYMORE");
+                System.out.println("WINDOW SHATTERS ALL OVER THE GROUND... YOU SHOULD GO HOME NOW");
             }
             moveToNextAction();
-            playerInTheTemple();
+            playerInTheForest();
         }
         else if (input == 2) {
             System.out.println("*GOING BACK HOME*");
@@ -217,7 +248,7 @@ public class GameManager {
         else {
             System.out.println("\n\n\nINVALID INPUT. TRY AGAIN");
             moveToNextAction();
-            playerInTheTemple();
+            playerInTheForest();
         }
 
     }
@@ -228,18 +259,22 @@ public class GameManager {
 
     public void battle(Character character, Character enemy, String location){
         clearScreen();
+        playerCharacter.setPlayersLastBattleHp();
         playerLocation = location;
         System.out.println("---------" + playerLocation + "---------");
         System.out.println("THE " + enemy.getName() + " WAS HIDDEN IN THE " + location + "\n");
+
         while(!character.isDead() && !enemy.isDead()){
             enemy.attack(character);
             System.out.println("\n\n" + enemy.getStats());
             System.out.println(playerCharacter.getStats());
             moveToNextAction();
+
             if(character.isDead()){
-                System.out.println("\nYOU ARE DEAD");
+                System.out.println("\n!VICTORY");
                 break;
             }
+
             character.attack(enemy);
             System.out.println("\n\n" + enemy.getStats());
             System.out.println(playerCharacter.getStats());
@@ -249,10 +284,7 @@ public class GameManager {
         }
         if(enemy.isDead()){
             switch (enemy.getName()) {
-                case "CAVEMAN" -> {
-                    System.out.println("There is no caveman anymore!");
-                    entityInTheCave = false;
-                }
+                case "CAVEMAN" -> entityInTheCave = false;
                 case "MONK" -> entityInTheTemple = false;
                 case "LUMBERJACK" -> entityInTheForest = false;
             }
@@ -260,6 +292,12 @@ public class GameManager {
         if(!playerCharacter.isDead()){
             System.out.println("YOU WON THE BATTLE! ++ LEVEL ++");
             playerCharacter.levelUp();
+        } else{
+            System.out.println("YOU DIED, BUT THE PROGRESS HAVE BEEN SAVED");
+            moveToNextAction();
+            playerCharacter.restorePlayersHp();
+            playerCharacter.setDead(false);
+            playerAtHome();
         }
         System.out.println(playerCharacter.getStats());
         moveToNextAction();
@@ -271,5 +309,9 @@ public class GameManager {
         Scanner scanner = new Scanner(System.in);
         String sc = scanner.nextLine();
         clearScreen();
+    }
+
+    public void wonTheGame(){
+        System.out.println("CONGRATULATIONS! YOU RESCUED THE WORLD!\n\n\n       --------THE END--------");
     }
 }

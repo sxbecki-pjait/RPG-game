@@ -7,6 +7,7 @@ public abstract class Character implements Attackable {
     private int attack;
     private boolean isDead = false;
     private String stats;
+    private int playersLastBattleHp;
 
 
     public Character(String name, String hometown, int hp, int attack) {
@@ -70,6 +71,10 @@ public abstract class Character implements Attackable {
         return isDead;
     }
 
+    public void setDead(boolean isDead) {
+        this.isDead = isDead;
+    }
+
     public void refreshStats(){
         stats = name + " STATS       HP " + hp + "/"+ hpMax + "       LEVEL " + level;
     }
@@ -95,6 +100,14 @@ public abstract class Character implements Attackable {
     public String getStats() {
         refreshStats();
         return stats;
+    }
+
+    public void restorePlayersHp(){
+        hp = playersLastBattleHp;
+        refreshStats();
+    }
+    public void setPlayersLastBattleHp(){
+        playersLastBattleHp = hp;
     }
 
     @Override
