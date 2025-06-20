@@ -1,5 +1,4 @@
 public class KingBruceLee extends Character{
-
     public KingBruceLee(){
         super("KING BRUCE LEE", 120, 15);
     }

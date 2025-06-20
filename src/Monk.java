@@ -1,5 +1,4 @@
 public class Monk extends Character {
-
     public Monk() {
         super("MONK", "TEMPLE", 150, 10);
     }

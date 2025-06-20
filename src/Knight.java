@@ -1,5 +1,4 @@
 public class Knight extends Character {
-    private int attackValue;
     public Knight() {
         super("KNIGHT", 100, 12);
     }

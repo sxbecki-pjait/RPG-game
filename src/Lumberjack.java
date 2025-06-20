@@ -1,5 +1,4 @@
 public class Lumberjack extends Character {
-    private boolean angry;
     public Lumberjack(boolean angry) {
         super("LUMBERJACK", "SHED IN THE FOREST", 180, 18);
         if(angry){
